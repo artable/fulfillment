@@ -34,7 +34,7 @@
 -endif.
 
 %% API
--export([start/1,start_link/1,stop/1,call/0]).
+-export([start/2,start_link/2,stop/1]).
 
 %% Supervisor Callbacks
 -export([terminate/3,code_change/4,init/1,callback_mode/0]).
@@ -54,9 +54,9 @@
 %%
 %% @end
 %%--------------------------------------------------------------------
--spec start(term()) -> {ok, atom()}.
-start(Initial_state) ->
-    gen_statem:start({local,?MODULE}, ?MODULE, Initial_state, []).
+-spec start(atom(),term()) -> {ok, atom()}.
+start(Statem_name,Initial_state) ->
+    gen_statem:start({local,Statem_name}, ?MODULE, Initial_state, []).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -66,9 +66,9 @@ start(Initial_state) ->
 %%
 %% @end
 %%--------------------------------------------------------------------
--spec start_link(term()) -> {ok, atom()}.
-start_link(Initial_state) ->
-    gen_statem:start_link({local,?MODULE},?MODULE,Initial_state,Initial_state).
+-spec start_link(atom(),term()) -> {ok, atom()}.
+start_link(Statem_name,Initial_state) ->
+    gen_statem:start_link({local,Statem_name},?MODULE,Initial_state,[]).
 
 
 %%--------------------------------------------------------------------
@@ -101,20 +101,16 @@ init(Worker_ids) ->
 callback_mode() -> handle_event_function.
 
 %%% state callback(s)
-call() ->
-    gen_statem:call(distributor,next).
 
 %%
 %% Used to select which registered worker is to be used next in 
 %% a round robin fashion.
 %% @private
-handle_event({call,From}, next, ready,[H|T]) ->
+handle_event({call,From}, next, ready,{Statem_name,State_data}) ->
     %Modify the state data and replace State_data below with the modified state data.
-    {next_state, ready,lists:append(T,[H]),[{reply,From,H}]}.
+    {next_state, ready,{Statem_name,State_data},[{reply,From,Statem_name}]}.
 
 
-%% This code is included in the compiled code only if 
-%% 'rebar3 eunit' is being executed.
 -ifdef(EUNIT).
 %%
 %% Unit tests go here. 
@@ -127,7 +123,7 @@ start_test() ->
 
 stop_test() ->
     {setup,
-        fun() -> gen_server:start_link({local, add}, ?MODULE, [], []) end,
+        fun() -> gen_server:start_link({local, ?SERVER}, ?MODULE, [], []) end,
         fun() -> ok end,
         [?_assertEqual(ok, stop())]}.
 
