@@ -1,1 +1,0 @@
--module(query_facility_dist).

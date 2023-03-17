@@ -1,1 +1,0 @@
--module(query_vehicle_history_dist).

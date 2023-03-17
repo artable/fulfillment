@@ -1,4 +1,29 @@
--module(store_package_info_dist).
+%%%-------------------------------------------------------------------
+%%% @author Lee Barney  <barney.cit@gmail.com>
+%%% @copyright © 2022, Lee S. Barney
+%%% @reference Licensed under the 
+%%% <a href="http://creativecommons.org/licenses/by/4.0/">
+%%% Creative Commons Attribution 4.0 International License</a>.
+%%%
+%%% @doc
+%%% This is a round robin balancer. Given a set of module-id pairs, this balancer
+%%% will distribute work in a  
+%%% <a href="https://www.techtarget.com/whatis/definition/round-robin">
+%%% round-robin</a> fashion.
+%%%
+%%% To use this round robin balancer, the balanced worker item must have a
+%%% locally or globally registered name. The registered name is used 
+%%% to add the item to a balancer.
+%%%
+%%%
+%%%
+%%% Be aware that a worker item can, via its ID, be added to more than 
+%%% one rr_balancer. This is by design, not by accident. 
+%%% @end
+
+%%% Created : 24 June 2022 by Lee Barney <barney.cit@gmail.com>
+%%%-------------------------------------------------------------------
+-module(distributor).
 -behaviour(gen_statem).
 
 %% Only include the eunit testing library

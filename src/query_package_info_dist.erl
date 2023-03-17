@@ -1,1 +1,0 @@
--module(query_package_info_dist).
