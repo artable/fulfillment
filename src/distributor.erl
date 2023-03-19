@@ -127,11 +127,14 @@ stop_test() ->
         fun() -> ok end,
         [?_assertEqual(ok, stop())]}.
 
-handle_events_() ->
-    [?_assertMatch(10, add([2,3,4,1])),
-    ?_assertMatch(7, add([7])),
-    ?_assertMatch(7, add(7)),
-    ?_assertMatch(nil, add([]))].
+handle_event_test() ->
+    {setup,
+        fun() -> gen_server:start_link({local, ?SERVER}, ?MODULE, [], []) end,
+        fun() -> gen_server:stop(?SERVER),
+        [?_assertMatch(10, add([2,3,4,1])),
+        ?_assertMatch(7, add([7])),
+        ?_assertMatch(7, add(7)),
+        ?_assertMatch(nil, add([]))]}.
 
 
 -endif.

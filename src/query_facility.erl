@@ -54,6 +54,7 @@ start(Registration_type,Name,Args) ->
 stop() -> gen_server:call(?MODULE, stop).
 
 %% Any other API functions go here.
+decode(Data) -> ok.
 
 %%%===================================================================
 %%% gen_server callbacks
@@ -148,11 +149,37 @@ code_change(_OldVsn, State, _Extra) ->
 
 -ifdef(EUNIT).
 %%
+decode_test() ->
+    {setup,
+    fun() -> meck:new(jsx),
+        meck:expect(jsx, decode, fun(Data) -> Data end) end,
+    fun() -> meck:unload(dog),
+    [?_assertException(error, badarg, decode("")),
+     ?_assertMatch()]}.
+
 handle_call_test() -> 
     {setup,
-    fun() -> end,
-    fun() -> end,
-    []
-    }.
+    fun()-> 
+        meck:new(riakc_obj),
+        meck:new(riakc_pb_socket),
+        meck:expect(riakc_obj, get_value, fun(_Bucket,_Key,_Value) -> done end),
+        meck:expect(riakc_pb_socket, get, fun(_Riak_pid,_Request, Name) -> 
+            case _Request of
+                <<"taco">> -> {error,notfound};
+                <<"123">> -> {ok, <<"Rexburg">>};
+                <<"1234">> -> {ok, <<"Seattle">>}
+            end
+                end)
+    end,
+    fun()-> 
+        meck:unload(riakc_obj),
+        meck:unload(riakc_pb_socket)
+    end,
+    [?_assert(query_facility:handle_call({query_fac,<<"123">>,<<"fac">>}, some_from_pid, some_riak_pid) =:= {reply,#{"city" => "Rexburg"},some_riak_pid}),
+     ?_assert(query_facility:handle_call({query_fac,<<"1234">>,<<"fac">>}, some_from_pid, some_riak_pid) =:= {reply,#{"city" => "Seattle"},some_riak_pid}),
+     ?_assert(query_facility:handle_call({query_fac,<<"">>,<<"fac">>}, some_from_pid, some_riak_pid) =:= {reply,{fail,empty_key},some_riak_pid}),
+     ?_assert(query_facility:handle_call({query_fac,<<"taco">>,<<"fac">>}, some_from_pid, some_riak_pid) =:= {reply,{fail,not_found},some_from_pid})
+    ]
+}.
 %%
 -endif.
