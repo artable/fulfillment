@@ -6,7 +6,7 @@
 -define(SERVER, ?MODULE).
 
 %% API
--export([start/0,start/3,stop/0,get_city_of/1]).
+-export([start/0,start/3,stop/0,get_city_of/2]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -54,7 +54,7 @@ start(Registration_type,Name,Args) ->
 stop() -> gen_server:call(?MODULE, stop).
 
 %% Any other API functions go here.
-get_city_of(Fac_UUID)-> gen_server:call(?MODULE, {query_fac,Fac_UUID}).
+get_city_of(Fac_UUID, Worker_PID)-> gen_server:call(Worker_PID, {query_fac,Fac_UUID}).
 
 %%%===================================================================
 %%% gen_server callbacks
@@ -69,7 +69,10 @@ get_city_of(Fac_UUID)-> gen_server:call(?MODULE, {query_fac,Fac_UUID}).
 %%--------------------------------------------------------------------
 -spec init(term()) -> {ok, term()}|{ok, term(), number()}|ignore |{stop, term()}.
 init([]) ->
-        {ok,replace_up}.
+    case riakc_pb_socket:start_link("143.198.108.90", 8087) of 
+        {ok,Riak_Pid} -> {ok,Riak_Pid};
+        _ -> {stop,link_failure}
+   end.
 %%--------------------------------------------------------------------
 %% @private
 %% @doc
