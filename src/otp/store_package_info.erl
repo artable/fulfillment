@@ -6,7 +6,7 @@
 -define(SERVER, ?MODULE).
 
 %% API
--export([start/0,start/3,stop/0]).
+-export([start/0,start/3,stop/0,put_package/2]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -54,6 +54,7 @@ start(Registration_type,Name,Args) ->
 stop() -> gen_server:call(?MODULE, stop).
 
 %% Any other API functions go here.
+put_package(Data, PID) -> gen_server:call(PID, {put, Data}).
 
 %%%===================================================================
 %%% gen_server callbacks
@@ -86,11 +87,12 @@ init([]) ->
                                   {noreply, term(), integer()} |
                                   {stop, term(), term(), integer()} | 
                                   {stop, term(), term()}.
-handle_call(Request, From, State) ->
-        {reply,replace_started,State};
+handle_call({get, {UUID, Holder, Time}}, _From, Riak_Pid) ->
+    Request = riakc_obj:new(<<"package">>, UUID, [Holder, Time]),    
+    {reply,riakc_pb_socket:put(Riak_Pid, Request),Riak_Pid};
 handle_call(stop, _From, _State) ->
         {stop,normal,
-                replace_stopped,
+                server_stopped,
           down}. %% setting the server's internal state to down
 
 %%--------------------------------------------------------------------

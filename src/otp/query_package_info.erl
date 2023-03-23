@@ -6,7 +6,7 @@
 -define(SERVER, ?MODULE).
 
 %% API
--export([start/0,start/3,stop/0]).
+-export([start/0,start/3,stop/0,get_history/2]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -54,6 +54,7 @@ start(Registration_type,Name,Args) ->
 stop() -> gen_server:call(?MODULE, stop).
 
 %% Any other API functions go here.
+get_history(UUID, PID) -> gen_server:call(PID, {get, UUID}).
 
 %%%===================================================================
 %%% gen_server callbacks
@@ -86,8 +87,12 @@ init([]) ->
                                   {noreply, term(), integer()} |
                                   {stop, term(), term(), integer()} | 
                                   {stop, term(), term()}.
-handle_call(Request, From, State) ->
-        {reply,replace_started,State};
+handle_call({get, UUID}, _From, Riak_Pid) ->
+    case  riakc_pb_socket:get(Riak_Pid, <<"package">>, UUID) of
+        {ok,Fetched} -> 
+            {reply,binary_to_term(riakc_obj:get_value(Fetched)),Riak_Pid};
+        Error -> {reply,Error,Riak_Pid}
+    end;
 handle_call(stop, _From, _State) ->
         {stop,normal,
                 replace_stopped,
