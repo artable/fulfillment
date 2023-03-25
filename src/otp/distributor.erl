@@ -24,7 +24,7 @@
 %%% Created : 24 June 2022 by Lee Barney <barney.cit@gmail.com>
 %%%-------------------------------------------------------------------
 -module(distributor).
--behaviour(gen_statem).
+-behaviour(gen_server).
 
 %% Only include the eunit testing library
 %% in the compiled code if testing is 
@@ -37,9 +37,9 @@
 -export([start/2,start_link/2,stop/1]).
 
 %% Supervisor Callbacks
--export([terminate/3,code_change/4,init/1,callback_mode/0]).
+-export([terminate/3,code_change/4,init/1]).
 %% State Callbacks
--export([handle_event/4]).
+-export([handle_call/3]).
 
 
 %%%===================================================================
@@ -97,19 +97,22 @@ init(Worker_ids) ->
     %% Set the initial state to be the list of available Worker_ids
     %% and types.
     {ok,ready,Worker_ids}.
-%% @private
-callback_mode() -> handle_event_function.
 
-%%% state callback(s)
 
 %%
 %% Used to select which registered worker is to be used next in 
 %% a round robin fashion.
 %% @private
-handle_event({call,From}, next, ready,{Statem_name,State_data}) ->
-    %Modify the state data and replace State_data below with the modified state data.
-    {next_state, ready,{Statem_name,State_data},[{reply,From,Statem_name}]}.
+handle_call(Request, From, State) ->
+    {reply, ok, State}.
 
+handle_cast(_Msg, State) ->
+    {noreply, State}.
+
+
+%%%===================================================================
+%%% Private Calls
+%%%===================================================================
 
 -ifdef(EUNIT).
 %%
