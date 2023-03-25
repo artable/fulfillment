@@ -6,7 +6,7 @@
 -define(SERVER, ?MODULE).
 
 %% API
--export([start/0,start/3,stop/0,put_vehicle/2]).
+-export([start/0,start/1,start/3,stop/0,put_vehicle/2]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -28,6 +28,9 @@
 -spec start() -> {ok, pid()} | ignore | {error, term()}.
 start() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
+
+start(Name) ->
+    gen_server:start_link({local, Name}, ?MODULE, [], []).
 %%--------------------------------------------------------------------
 %% @doc
 %% Starts a server using this module and registers the server using
@@ -90,7 +93,7 @@ init([]) ->
 handle_call({get, {UUID, Location, Time}}, _From, Riak_Pid) ->
     case  riakc_pb_socket:get(Riak_Pid, <<"vehicle">>, UUID) of
         {ok,Fetched} -> 
-            Request = riakc_obj:update_value(Fetched, list_to_binary([binary_to_list(Fetched)] ++ [{Location, Time}])),
+            Request = riakc_obj:update_value(Fetched, list_to_binary([{Location, Time}] ++ [binary_to_list(Fetched)])),
             {reply,riakc_pb_socket:put(Riak_Pid, Request),Riak_Pid};
         _ -> Request = riakc_obj:new(<<"vehicle">>, UUID, list_to_binary([{Location, Time}])),    
         {reply,riakc_pb_socket:put(Riak_Pid, Request),Riak_Pid}
