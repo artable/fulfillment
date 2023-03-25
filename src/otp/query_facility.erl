@@ -6,7 +6,7 @@
 -define(SERVER, ?MODULE).
 
 %% API
--export([start/0,start/3,stop/0,get_city/2]).
+-export([start/0,start/3,stop/0,get_city_of/2]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -54,7 +54,7 @@ start(Registration_type,Name,Args) ->
 stop() -> gen_server:call(?MODULE, stop).
 
 %% Any other API functions go here.
-get_city(UUID, PID) -> gen_server:call(PID, {get, UUID}).
+get_city_of(UUID, PID) -> gen_server:call(PID, {get, UUID}).
 
 
 %%%===================================================================

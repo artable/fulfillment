@@ -88,12 +88,21 @@ init([]) ->
                                   {stop, term(), term(), integer()} | 
                                   {stop, term(), term()}.
 handle_call({get, {UUID, Location, Time}}, _From, Riak_Pid) ->
-    Request = riakc_obj:new(<<"vehicle">>, UUID, [Location, Time]),    
-    {reply,riakc_pb_socket:put(Riak_Pid, Request),Riak_Pid};
+    case  riakc_pb_socket:get(Riak_Pid, <<"vehicle">>, UUID) of
+        {ok,Fetched} -> 
+            Request = riakc_obj:update_value(Fetched, list_to_binary([binary_to_list(Fetched)] ++ [{Location, Time}])),
+            {reply,riakc_pb_socket:put(Riak_Pid, Request),Riak_Pid};
+        _ -> Request = riakc_obj:new(<<"vehicle">>, UUID, list_to_binary([{Location, Time}])),    
+        {reply,riakc_pb_socket:put(Riak_Pid, Request),Riak_Pid}
+    end;
+    
 handle_call(stop, _From, _State) ->
         {stop,normal,
                 server_stopped,
           down}. %% setting the server's internal state to down
+
+
+          
 
 %%--------------------------------------------------------------------
 %% @private
