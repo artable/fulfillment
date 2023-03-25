@@ -14,7 +14,7 @@
 
 %%% Created : 24 October 2022 by Lee Barney <barney.cit@gmail.com>
 %%%-------------------------------------------------------------------
--module(supervisor_template).
+-module(distributor_sup).
 -behaviour(supervisor).
 
 %%%===================================================================
