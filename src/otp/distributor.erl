@@ -39,12 +39,13 @@
 %% Supervisor Callbacks
 -export([terminate/3,code_change/4,init/1]).
 %% State Callbacks
--export([handle_call/3]).
+-export([handle_call/3,handle_cast/2,call/1]).
 
 
 %%%===================================================================
 %%% Public API functions
 %%%===================================================================
+call(PID) -> gen_server:call(PID, next).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -103,11 +104,13 @@ init(Worker_ids) ->
 %% Used to select which registered worker is to be used next in 
 %% a round robin fashion.
 %% @private
-handle_call(Request, From, State) ->
-    {reply, ok, State}.
+handle_call(next, _From, [H|T]) ->
+    {reply, {ok, H}, lists:append(T,[H])};
+handle_call(stop, _From, _State) ->
+    {stop, normal, server_stopped, down}.
 
-handle_cast(_Msg, State) ->
-    {noreply, State}.
+handle_cast(_Msg, _State) ->
+    {noreply, _State}.
 
 
 %%%===================================================================
