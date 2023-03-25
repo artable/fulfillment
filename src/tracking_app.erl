@@ -12,7 +12,13 @@
 start(_StartType, _StartArgs) ->
     Dispatch = cowboy_router:compile([
         {'_', [
-            {"/", toppage_h, []}
+            {"/", toppage_h, []},
+            {"/query_facility", query_facility_h, []},
+            {"/query_package_history", query_package_info_h, []},
+            {"/query_vehicle_history", query_vehicle_history_h,[]},
+            {"/store_facility_info", query_vehicle_history_h, []},
+            {"/store_package_info", store_package_info_h, []},
+            {"/store_vehicle_info", store_vehicle_info_h, []}
         ]} 
     ]),
     PrivDir = code:priv_dir(tracking),
