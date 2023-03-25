@@ -158,15 +158,28 @@ code_change(_OldVsn, State, _Extra) ->
 %%% Internal functions
 %%%===================================================================
 
-
+is_valid(Map) -> ok.
 
 -ifdef(EUNIT).
 %%
-handle_call_test() -> 
-    {setup,
-    fun() -> end,
-    fun() -> end,
-    []
-    }.
+is_valid_tests_() -> 
+    [
+        ?_assert_match(
+            is_valid(#{<<"package_uuid">> => <<"valid_value">>}),
+            true
+        ),
+        ?_assert_match(
+            is_valid(#{<<"facility_uuid">> => <<"">>}), %invalid value
+            false
+        ),
+        ?_assert_match(
+            is_valid(#<<"invalid_key">> => <<"valid_value">>),
+            false
+        ),
+        ?_assert_match(
+            is_valid(#<<"invalid_key">> => <<"">>), %invalid value
+            false
+        )
+    ].
 %%
 -endif.

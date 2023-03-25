@@ -1,4 +1,4 @@
--module(query_package_info).
+-module(query_package_history).
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
@@ -158,9 +158,27 @@ code_change(_OldVsn, State, _Extra) ->
 %%
 handle_call_test() -> 
     {setup,
-    fun() -> end,
-    fun() -> end,
-    []
-    }.
+    fun()-> 
+        meck:new(riakc_obj),
+        meck:new(riakc_pb_socket),
+        meck:expect(riakc_obj, get_value, fun(_Bucket,_Key,_Value) -> done end),
+        meck:expect(riakc_pb_socket, get, fun(_Riak_pid,_Request, _Name) -> 
+            
+            case Request of
+                {<<"123">>} -> [#{}]
+                _ -> {error, novalue}
+            end
+                end)
+    end,
+    fun()-> 
+        meck:unload(riakc_obj),
+        meck:unload(riakc_pb_socket)
+    end,
+    [?_assert_match(query_facility:handle_call({query_package_hist,<<"123">>}, some_from_pid, some_riak_pid), {reply,[#{"holder_uuid" =: "h_1234"}, #{"timestamp" =: "12345"},],some_riak_pid}),
+     ?_assert(query_facility:handle_call({query_package_hist,<<"1234">>,<<"fac">>}, some_from_pid, some_riak_pid) =:= {reply,<<"Seattle">>,some_riak_pid}),
+     ?_assert(query_facility:handle_call({query_fac,<<"">>,<<"fac">>}, some_from_pid, some_riak_pid) =:= {reply,{fail,empty_key},some_riak_pid}),
+     ?_assert(query_facility:handle_call({query_fac,<<"taco">>,<<"fac">>}, some_from_pid, some_riak_pid) =:= {reply,{fail,not_found},some_from_pid})
+    ]
+}.
 %%
 -endif.
