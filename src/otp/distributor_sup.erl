@@ -61,7 +61,7 @@ start(Supervisor_name,Registration_type,Start_info)->
 %%% Mandatory callback functions
 %%%===================================================================
 
-init({Distributor_id, Worker_ids, Worker_module}) ->
+init({Section, N_workers, Worker_module}) ->
 
 %% A supervisor specification is a record with the following mappings.
 %%
@@ -87,23 +87,41 @@ init({Distributor_id, Worker_ids, Worker_module}) ->
         intensity => 1000,
         period => 1
     },
+    Distributor_id = list_to_atom(atom_to_list(Section) ++ "_dist"),
+    Worker_base_id = atom_to_list(Section) ++ "_w_",
     Worker_specs = [distributor_spec(Distributor_id) |
-                    worker_specs(Worker_ids, Worker_module)],
+                    worker_specs(gen_ids(Worker_base_id, N_workers),
+                    Worker_module, Distributor_id)],
     {ok,{Sup_spec, Worker_specs}}.
 
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
+
+
 distributor_spec(Id) ->
     generate_worker_spec(Id, distributor).
 
-worker_specs(Ids, Module)->
-    Gen = fun (Id) -> generate_worker_spec(Id, Module) end,
+gen_ids(Base, N) ->
+    [{global, Base++integer_to_list(X)} || X <-lists:seq(1,N)].
+
+
+
+worker_specs(Ids, Module, Arg)->
+    Gen = fun (Id) -> generate_worker_spec(Id, Module, Arg) end,
     lists:map(Gen, Ids).
+
+generate_worker_spec(Name, Module, Arg) ->
+    #{id => Name,
+    start => {Module,start_g,[Name, Arg]},
+    restart => permanent,
+    shutdown => 2000,
+    type => worker,
+    modules => [Module]}.
 
 generate_worker_spec(Name, Module) ->
     #{id => Name,
-    start => {Module,start_link,[Name]},
+    start => {Module,start_g,[Name]},
     restart => permanent,
     shutdown => 2000,
     type => worker,

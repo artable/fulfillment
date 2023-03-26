@@ -6,7 +6,7 @@
 -define(SERVER, ?MODULE).
 
 %% API
--export([start/0,start/1,start_g/1,start/3,stop/0,get_city_of/2]).
+-export([start/0,start/1,start_g/2,start/3,stop/0,get_city_of/2]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -29,8 +29,8 @@
 start() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
-start_g(Name) ->
-    gen_server:start_link({global, Name}, ?MODULE, [], []).
+start_g(Name, Args) ->
+    gen_server:start_link({global, Name}, ?MODULE, Args, []).
 
 start(Name) ->
     gen_server:start_link({local, Name}, ?MODULE, [], []).

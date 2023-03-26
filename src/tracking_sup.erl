@@ -29,8 +29,39 @@ init([]) ->
     SupFlags = #{strategy => one_for_all,
                  intensity => 0,
                  period => 1},
-    ChildSpecs = [],
+    Sup_specs = fun ({Section, N_workers, W_module}) ->
+        Sup_name = atom_to_list(Section) ++ "_sup",
+                   child_sup(list_to_atom(Sup_name), 
+                  {list_to_atom(Section), N_workers, W_module})
+    end,
+    ChildSpecs = lists:map(Sup_specs, distributor_config()),
+
+
     {ok, {SupFlags, ChildSpecs}}.
 
+
+child_sup(Id, Start_info) ->
+    
+    #{id => Id,
+    start => {distributor_sup,start,[Start_info]},
+    restart => permanent,
+    shutdown => 2000,
+    type => supervisor,
+    modules => [distributor_sup]}.
+
 %% internal functions
-workers()
+% qf_dist
+% qp_dist
+% qv_dist
+% sf_dist
+% sp_dist
+% sv_dist
+distributor_config() ->
+    [
+        {qf, 100, query_facility},
+        {qp, 100, query_package_history},
+        {qv, 100, query_vehicle_history},
+        {sf, 100, store_facility_info},
+        {sp, 100, store_package_info},
+        {sv, 100, store_vehicle_info}
+    ].
