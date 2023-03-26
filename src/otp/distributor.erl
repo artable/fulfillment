@@ -39,13 +39,14 @@
 %% Supervisor Callbacks
 -export([terminate/3,code_change/4,init/1]).
 %% State Callbacks
--export([handle_call/3,handle_cast/2,call/1]).
+-export([handle_call/3,handle_cast/2,call/1,add/1]).
 
 
 %%%===================================================================
 %%% Public API functions
 %%%===================================================================
 call(PID) -> gen_server:call(PID, next).
+add(PID) -> gen_server:call(PID, add).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -106,6 +107,8 @@ init(Worker_ids) ->
 %% @private
 handle_call(next, _From, [H|T]) ->
     {reply, {ok, H}, lists:append(T,[H])};
+handle_call(add, From, State) ->
+    {reply, {ok, done}, lists:append(State, From)};
 handle_call(stop, _From, _State) ->
     {stop, normal, server_stopped, down}.
 

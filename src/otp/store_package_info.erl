@@ -72,6 +72,7 @@ put_package(Data, PID) -> gen_server:call(PID, {put, Data}).
 %%--------------------------------------------------------------------
 -spec init(term()) -> {ok, term()}|{ok, term(), number()}|ignore |{stop, term()}.
 init([]) ->
+    distributor:add(sp_dist),
     case riakc_pb_socket:start_link("143.198.108.90", 8087) of 
         {ok,Riak_Pid} -> {ok,Riak_Pid};
         _ -> {stop,link_failure}
