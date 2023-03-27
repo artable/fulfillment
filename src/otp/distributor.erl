@@ -101,7 +101,7 @@ code_change(_Vsn, State, Data, _Extra) ->
 init(Worker_ids) ->
     %% Set the initial state to be the list of available Worker_ids
     %% and types.
-    {ok,Worker_ids}.
+    {ok,[Worker_ids]}.
 
 
 %%
@@ -111,7 +111,7 @@ init(Worker_ids) ->
 handle_call(next, _From, [H|T]) ->
     {reply, {ok, H}, lists:append(T,[H])};
 handle_call(add, From, State) ->
-    {reply, {ok, done}, lists:append(State, From)};
+    {reply, {ok, done}, lists:append(State, [From])};
 handle_call(stop, _From, _State) ->
     {stop, normal, server_stopped, down}.
 
