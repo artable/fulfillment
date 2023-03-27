@@ -12,7 +12,9 @@ store_query(Req0, [Distributor]) ->
 
 store_query_veh(Req0, [Distributor]) ->
     {ok,Data,_} = cowboy_req:read_body(Req0),
-    {Location, UUID} = jsx:decode(Data),
+    Map = jsx:decode(Data, [return_maps]),
+    Location = maps:get(<<"location">>, Map),
+    UUID = maps:get(<<"vehicle_uuid">>, Map),
     Worker = distributor:call(Distributor),
     case gen_server:call(Worker, {UUID, Location}) of
         fail -> Req0;
