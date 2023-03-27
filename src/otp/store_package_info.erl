@@ -6,7 +6,7 @@
 -define(SERVER, ?MODULE).
 
 %% API
--export([start/0,start/3,stop/0,put_package/2]).
+-export([start/0,start/1,start/3,stop/0,put_package/2]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -28,6 +28,9 @@
 -spec start() -> {ok, pid()} | ignore | {error, term()}.
 start() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
+
+start(Name) ->
+    gen_server:start_link({local, Name}, ?MODULE, [], []).
 %%--------------------------------------------------------------------
 %% @doc
 %% Starts a server using this module and registers the server using
@@ -69,6 +72,7 @@ put_package(Data, PID) -> gen_server:call(PID, {put, Data}).
 %%--------------------------------------------------------------------
 -spec init(term()) -> {ok, term()}|{ok, term(), number()}|ignore |{stop, term()}.
 init([]) ->
+    distributor:add(sp_dist),
     case riakc_pb_socket:start_link("143.198.108.90", 8087) of 
         {ok,Riak_Pid} -> {ok,Riak_Pid};
         _ -> {stop,link_failure}
@@ -90,11 +94,14 @@ init([]) ->
 handle_call({get, {UUID, Holder, Time}}, _From, Riak_Pid) ->
     case  riakc_pb_socket:get(Riak_Pid, <<"package">>, UUID) of
         {ok,Fetched} -> 
-            Request = {{Holder, Time}, binary_to_term(riakc_obj:get_value(Fetched))},
-            ModRequest = riakc_obj:update_value(Fetched, Request),   
-            {reply,riakc_pb_socket:put(Riak_Pid, ModRequest),Riak_Pid};
+            {reply,riakc_pb_socket:put(
+            Riak_Pid, riakc_obj:update_value(
+                Fetched, list_to_binary({[{Holder, Time}] ++ binary_to_list(riakc_obj:get_value(Fetched)
+                )}))),
+            Riak_Pid
+            };
         _ -> 
-            Request = riakc_obj:new(<<"package">>, UUID, {Holder, Time}),    
+            Request = riakc_obj:new(<<"package">>, UUID, binary_to_list([{Holder, Time}])),    
             {reply,riakc_pb_socket:put(Riak_Pid, Request),Riak_Pid}
     end;
     
