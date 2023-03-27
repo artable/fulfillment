@@ -1,7 +1,7 @@
 -module(otp_wrapper).
 -export([store_query/2, push_query/2]).
 
-store_query(Req0, Distributor) ->
+store_query(Req0, [Distributor]) ->
     Req_dec = jsx:decode(Req0),
     Worker = distributor:call(Distributor),
     case gen_server:call(Worker, Req_dec) of
@@ -9,7 +9,7 @@ store_query(Req0, Distributor) ->
         _ -> cowboy_req:reply(200, Req0)
     end.
 
-push_query(Req0, Distributor) ->
+push_query(Req0, [Distributor]) ->
     Worker = distributor:call(Distributor),
     case gen_server:call(Worker,jsx:decode(Req0)) of
         fail -> Req0;
