@@ -94,7 +94,7 @@ init(Dist) ->
                                   {noreply, term(), integer()} |
                                   {stop, term(), term(), integer()} | 
                                   {stop, term(), term()}.
-handle_call({get, {UUID, City}}, _From, Riak_Pid) ->
+handle_call({get, {UUID, City,_}}, _From, Riak_Pid) ->
     Request = riakc_obj:new(<<"facility">>, UUID, City),    
     {reply,riakc_pb_socket:put(Riak_Pid, Request),Riak_Pid};
 handle_call(stop, _From, _State) ->
