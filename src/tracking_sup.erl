@@ -32,7 +32,7 @@ init([]) ->
     Sup_specs = fun ({Section, N_workers, W_module}) ->
         Sup_name = atom_to_list(Section) ++ "_sup",
                    child_sup(list_to_atom(Sup_name), 
-                  {list_to_atom(Section), N_workers, W_module})
+                  {Section, N_workers, W_module})
     end,
     ChildSpecs = lists:map(Sup_specs, distributor_config()),
 
