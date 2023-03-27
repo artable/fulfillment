@@ -121,7 +121,7 @@ generate_worker_spec(Name, Module, Arg) ->
 
 generate_worker_spec(Name, Module) ->
     #{id => Name,
-    start => {Module,start_g,[Name]},
+    start => {Module,start,[Name]},
     restart => permanent,
     shutdown => 2000,
     type => worker,

@@ -34,7 +34,7 @@
 -endif.
 
 %% API
--export([start/2,start_link/2,stop/1]).
+-export([start/1,start/2,start_link/2,stop/1]).
 
 %% Supervisor Callbacks
 -export([terminate/3,code_change/4,init/1]).
@@ -59,6 +59,9 @@ add(PID) -> gen_server:call(PID, add).
 -spec start(atom(),term()) -> {ok, atom()}.
 start(Statem_name,Initial_state) ->
     gen_statem:start({local,Statem_name}, ?MODULE, Initial_state, []).
+
+start(Name) ->
+    gen_server:start_link({local, Name}, ?MODULE, [], []).
 
 %%--------------------------------------------------------------------
 %% @doc
