@@ -43,7 +43,7 @@ init([]) ->
 child_sup(Id, Start_info) ->
     
     #{id => Id,
-    start => {distributor_sup,start,[Start_info]},
+    start => {distributor_sup,start,[Id, Start_info]},
     restart => permanent,
     shutdown => 2000,
     type => supervisor,
