@@ -104,7 +104,7 @@ handle_call({get, {UUID, Holder, Time}}, _From, Riak_Pid) ->
           Riak_Pid
           };
       _ -> 
-          Request = riakc_obj:new(<<"package">>, UUID, binary_to_list([{Holder, Time}])),    
+          Request = riakc_obj:new(<<"package">>, UUID, [{Holder, Time}]),    
           {reply,riakc_pb_socket:put(Riak_Pid, Request),Riak_Pid}
   end;
     
