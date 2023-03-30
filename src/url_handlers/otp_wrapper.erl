@@ -4,7 +4,7 @@
 store_query(Req0, [Distributor]) ->
     {ok,Data,_} = cowboy_req:read_body(Req0),
     {Pack_UUID,Holder_UUID,Time} = jsx:decode(Data),
-    Worker = distributor:call(Distributor),
+    {ok, Worker} = distributor:call(Distributor),
     case gen_server:call(Worker, {put, {Pack_UUID, Holder_UUID, Time}}) of
         fail -> Req0;
         _ -> cowboy_req:reply(200, Req0)
@@ -16,14 +16,14 @@ store_query_veh(Req0, [Distributor]) ->
     Location = maps:get(<<"location">>, Map),
     UUID = maps:get(<<"vehicle_uuid">>, Map),
     Time = maps:get(<<"time_stamp">>, Map),
-    {ok, {PID, _}} = distributor:call(Distributor),
+    {ok, PID} = distributor:call(Distributor),
     case gen_server:call(PID, {get, {UUID, Location, Time}}) of
         fail -> Req0;
         _ -> cowboy_req:reply(200, Req0)
     end.
 
 push_query(Req0, [Distributor]) ->
-    Worker = distributor:call(Distributor),
+    {ok,Worker} = distributor:call(Distributor),
     {ok,Data,_} = cowboy_req:read_body(Req0),
     {UUID,_} = jsx:decode(Data),
     case gen_server:call(Worker,{get, UUID}) of
