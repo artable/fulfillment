@@ -91,14 +91,19 @@ init([]) ->
                                   {noreply, term(), integer()} |
                                   {stop, term(), term(), integer()} | 
                                   {stop, term(), term()}.
-handle_call({get, {UUID, Location, Time}}, _From, Riak_Pid) ->
-    case  riakc_pb_socket:get(Riak_Pid, <<"vehicle">>, UUID) of
-        {ok,Fetched} -> 
-            Request = riakc_obj:update_value(Fetched, list_to_binary([{Location, Time}] ++ [binary_to_list(Fetched)])),
-            {reply,riakc_pb_socket:put(Riak_Pid, Request),Riak_Pid};
-        _ -> Request = riakc_obj:new(<<"vehicle">>, UUID, list_to_binary([{Location, Time}])),    
-        {reply,riakc_pb_socket:put(Riak_Pid, Request),Riak_Pid}
-    end;
+handle_call({get, {UUID, Holder, Time}}, _From, Riak_Pid) ->
+  case  riakc_pb_socket:get(Riak_Pid, <<"package">>, UUID) of
+      {ok,Fetched} -> 
+          {reply,riakc_pb_socket:put(
+          Riak_Pid, riakc_obj:update_value(
+              Fetched, {[{Holder, Time}] ++ riakc_obj:get_value(Fetched)
+              })),
+          Riak_Pid
+          };
+      _ -> 
+          Request = riakc_obj:new(<<"package">>, UUID, binary_to_list([{Holder, Time}])),    
+          {reply,riakc_pb_socket:put(Riak_Pid, Request),Riak_Pid}
+  end;
     
 handle_call(stop, _From, _State) ->
         {stop,normal,
