@@ -34,7 +34,7 @@
 -endif.
 
 %% API
--export([start/2,start_link/2,stop/1]).
+-export([start/1,start/2,start_link/2,stop/1]).
 
 %% Supervisor Callbacks
 -export([terminate/3,code_change/4,init/1]).
@@ -59,6 +59,9 @@ add(PID) -> gen_server:call(PID, add).
 -spec start(atom(),term()) -> {ok, atom()}.
 start(Statem_name,Initial_state) ->
     gen_statem:start({local,Statem_name}, ?MODULE, Initial_state, []).
+
+start(Name) ->
+    gen_server:start_link({local, Name}, ?MODULE, [], []).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -98,7 +101,7 @@ code_change(_Vsn, State, Data, _Extra) ->
 init(Worker_ids) ->
     %% Set the initial state to be the list of available Worker_ids
     %% and types.
-    {ok,ready,Worker_ids}.
+    {ok,[Worker_ids]}.
 
 
 %%
@@ -108,7 +111,7 @@ init(Worker_ids) ->
 handle_call(next, _From, [H|T]) ->
     {reply, {ok, H}, lists:append(T,[H])};
 handle_call(add, From, State) ->
-    {reply, {ok, done}, lists:append(State, From)};
+    {reply, {ok, done}, lists:append(State, [From])};
 handle_call(stop, _From, _State) ->
     {stop, normal, server_stopped, down}.
 

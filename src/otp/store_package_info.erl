@@ -6,7 +6,7 @@
 -define(SERVER, ?MODULE).
 
 %% API
--export([start/0,start/1,start/3,stop/0,put_package/2]).
+-export([start/0,start/1,start_g/2,start/3,stop/0,put_package/2]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -28,6 +28,9 @@
 -spec start() -> {ok, pid()} | ignore | {error, term()}.
 start() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
+
+start_g(Name, Args) ->
+    gen_server:start_link({global, Name}, ?MODULE, Args, []).
 
 start(Name) ->
     gen_server:start_link({local, Name}, ?MODULE, [], []).
@@ -71,8 +74,8 @@ put_package(Data, PID) -> gen_server:call(PID, {put, Data}).
 %% @end
 %%--------------------------------------------------------------------
 -spec init(term()) -> {ok, term()}|{ok, term(), number()}|ignore |{stop, term()}.
-init([]) ->
-    distributor:add(sp_dist),
+init(Dist) ->
+    distributor:add(Dist),
     case riakc_pb_socket:start_link("143.198.108.90", 8087) of 
         {ok,Riak_Pid} -> {ok,Riak_Pid};
         _ -> {stop,link_failure}
