@@ -109,7 +109,10 @@ init(Worker_ids) ->
 %% a round robin fashion.
 %% @private
 handle_call(next, _From, [H|T]) ->
-    {reply, {ok, H}, lists:append(T,[H])};
+    case H == [] of
+        true -> {reply, (error, empty_list), []};
+        false -> {reply, {ok, H}, lists:append(T,[H])}
+    end;
 handle_call(add, From, State) ->
     {reply, {ok, done}, lists:append(State, [From])};
 handle_call(stop, _From, _State) ->
