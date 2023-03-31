@@ -93,7 +93,7 @@ init(Dist) ->
                                   {noreply, term(), integer()} |
                                   {stop, term(), term(), integer()} | 
                                   {stop, term(), term()}.
-handle_call({get, Map}, _From, Riak_Pid) ->
+handle_call({put, Map}, _From, Riak_Pid) ->
     UUID = maps:get(<<"facility_uuid">>, Map),
     City = maps:get(<<"city">>, Map),
     Request = riakc_obj:new(<<"facility">>, UUID, City),    
