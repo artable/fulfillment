@@ -101,7 +101,7 @@ code_change(_Vsn, State, Data, _Extra) ->
 init(Worker_ids) ->
     %% Set the initial state to be the list of available Worker_ids
     %% and types.
-    {ok,[Worker_ids]}.
+    {ok,Worker_ids}.
 
 
 %%
