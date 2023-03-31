@@ -30,7 +30,7 @@ start() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 start_g(Name, Args) ->
-    gen_server:start_link({global, Name}, ?MODULE, Args, []).
+    gen_server:start_link(Name, ?MODULE, Args, []).
 
 start(Name) ->
     gen_server:start_link({local, Name}, ?MODULE, [], []).
