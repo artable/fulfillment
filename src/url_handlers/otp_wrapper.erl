@@ -37,7 +37,7 @@ push_query(Req0, [Distributor]) ->
                 end
     end,
     case gen_server:call(Worker,{get, UUID}) of
-        fail -> Req0;
+        (error, _) -> Req0;
         Data -> cowboy_reply:reply(200, 
             #{<<"content-type">> => <<"text/json">>},
             Data,
