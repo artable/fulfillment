@@ -58,7 +58,7 @@ add(PID) -> gen_server:call(PID, add).
 %%--------------------------------------------------------------------
 -spec start(atom(),term()) -> {ok, atom()}.
 start(Statem_name,Initial_state) ->
-    gen_statem:start({local,Statem_name}, ?MODULE, Initial_state, []).
+    gen_server:start_link({local,Statem_name}, ?MODULE, Initial_state, []).
 
 start(Name) ->
     gen_server:start_link({local, Name}, ?MODULE, [], []).
@@ -73,7 +73,7 @@ start(Name) ->
 %%--------------------------------------------------------------------
 -spec start_link(atom(),term()) -> {ok, atom()}.
 start_link(Statem_name,Initial_state) ->
-    gen_statem:start_link({local,Statem_name},?MODULE,Initial_state,[]).
+    gen_server:start_link({local,Statem_name},?MODULE,Initial_state,[]).
 
 
 %%--------------------------------------------------------------------
