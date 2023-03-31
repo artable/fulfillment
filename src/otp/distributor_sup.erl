@@ -92,18 +92,25 @@ init({Section, N_workers, Worker_module}) ->
     },
     Distributor_id = list_to_atom(atom_to_list(Section) ++ "_dist"),
     Worker_base_id = atom_to_list(Section) ++ "_w_",
-    Worker_specs = [distributor_spec(Distributor_id) |
-                    worker_specs(gen_ids(Worker_base_id, N_workers),
-                    Worker_module, Distributor_id)],
-    {ok,{Sup_spec, Worker_specs}}.
+    Worker_ids = gen_ids(Worker_base_id, N_workers),
+    Worker_specs = worker_specs(Worker_ids,Worker_module, Distributor_id),
+
+    Distributor_spec = distributor_spec(Distributor_id, Worker_ids),
+    {ok,{Sup_spec, [Distributor_spec | Worker_specs]}}.
 
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
 
 
-distributor_spec(Id) ->
-    generate_worker_spec(Id, distributor).
+distributor_spec(Id, Workers) ->
+    #{id => Id,
+    start => {distributor,start,[Id, Workers]},
+    restart => permanent,
+    shutdown => 2000,
+    type => worker,
+    modules => [distributor]}.
+
 
 gen_ids(Base, N) ->
     [{global, Base++integer_to_list(X)} || X <-lists:seq(1,N)].
