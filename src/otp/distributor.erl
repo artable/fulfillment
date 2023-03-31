@@ -111,7 +111,10 @@ init(Worker_ids) ->
 handle_call(next, _From, [H|T]) ->
     {reply, {ok, H}, lists:append(T,[H])};
 handle_call(add, From, State) ->
-    {reply, {ok, done}, lists:append(State, [From])};
+    case State of
+        [] -> {reply, {ok, done}, [From]};
+        _  -> {reply, {ok, done}, lists:append(State, [From])}
+    end;
 handle_call(stop, _From, _State) ->
     {stop, normal, server_stopped, down}.
 
