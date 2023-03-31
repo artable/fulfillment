@@ -31,9 +31,9 @@ push_query(Req0, [Distributor]) ->
     Map = jsx:decode(Data),
     case maps:is_key(<<"package_uuid">>, Map) of
         true -> UUID = maps:get(<<"package_uuid">>, Map);
-        false -> case map:is_key(<<"vehicle_uuid">>, Map) of
+        false -> case maps:is_key(<<"vehicle_uuid">>, Map) of
                     true -> UUID = maps:get(<<"vehicle_uuid">>, Map);
-                    false -> case map:is_key(<<"facility_uuid">>, Map) of
+                    false -> case maps:is_key(<<"facility_uuid">>, Map) of
                                 true -> UUID = maps:get(<<"facility_uuid">>, Map);
                                 false -> UUID = fail
                             end
