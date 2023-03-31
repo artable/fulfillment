@@ -4,11 +4,8 @@
 store_query(Req0, [Distributor]) ->
     {ok,Data,_} = cowboy_req:read_body(Req0),
     Map = jsx:decode(Data),
-    Holder_UUID = maps:get(<<"holder_uuid">>, Map),
-    Pack_UUID = maps:get(<<"package_uuid">>, Map),
-    Time = maps:get(<<"time_stamp">>, Map),
     {ok, Worker} = distributor:call(Distributor),
-    case gen_server:call(Worker, {put, {Pack_UUID, Holder_UUID, Time}}) of
+    case gen_server:call(Worker, {put, Map}) of
         fail -> Req0;
         _ -> cowboy_req:reply(200, Req0)
     end.
