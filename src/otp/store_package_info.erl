@@ -93,7 +93,7 @@ init(Dist) ->
                                   {noreply, term(), integer()} |
                                   {stop, term(), term(), integer()} | 
                                   {stop, term(), term()}.
-handle_call({get, Map}, _From, Riak_Pid) ->
+handle_call({put, Map}, _From, Riak_Pid) ->
     Location = maps:get(<<"holder_uuid">>, Map),
     UUID = maps:get(<<"package_uuid">>, Map),
     Time = maps:get(<<"time_stamp">>, Map),
