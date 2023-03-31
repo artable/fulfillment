@@ -1,5 +1,5 @@
 -module(test_fds).
--export([count/0]).
+-export([count/0, push_map/1]).
 
 count() -> count(1, []).
 
@@ -22,3 +22,9 @@ delete(N) ->
   end,
 
 delete(N-1).
+
+push_map(Map) -> 
+  {ok, Riak_Pid} = riakc_pb_socket:start_link("143.198.108.90", 8087),
+  Request = riakc_obj:new(<<"test">>, <<"a_thing">>, Map),
+  riakc_pb_socket:put(Riak_Pid, Request),
+  io:format("~p~n", [riakc_pb_socket:get(Riak_Pid, <<"test">>, <<"a_thing">>)]).
