@@ -58,10 +58,10 @@ child_sup(Id, Start_info) ->
 % sv_dist
 distributor_config() ->
     [
-        {qf, 10000, query_facility},
-        {qp, 10000, query_package_history},
-        {qv, 10000, query_vehicle_history},
-        {sf, 10000, store_facility_info},
-        {sp, 10000, store_package_info},
-        {sv, 10000, store_vehicle_info}
+        {qf, 100, query_facility},
+        {qp, 100, query_package_history},
+        {qv, 100, query_vehicle_history},
+        {sf, 100, store_facility_info},
+        {sp, 100, store_package_info},
+        {sv, 100, store_vehicle_info}
     ].
